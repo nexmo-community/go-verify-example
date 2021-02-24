@@ -13,12 +13,12 @@ import (
 )
 
 var (
-	// key must be 16, 24 or 32 bytes long (AES-128, AES-192 or AES-256)
+	// Key must be 16, 24 or 32 bytes long (AES-128, AES-192 or AES-256)
 	key   = []byte("super-secret-key")
 	store = sessions.NewCookieStore(key)
 )
 
-// UserData about the user
+// UserData: Info from session that we'll use in the UI
 type UserData struct {
 	Name  string
 	Phone string
@@ -33,7 +33,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 	// Check if user is authenticated
 	if auth, ok := session.Values["registered"].(bool); !ok || !auth {
-		// not authenticated, register user
+		// Not authenticated, so user must register
 		http.Redirect(w, r, "/register", 302)
 	}
 
@@ -47,9 +47,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 		"./tmpl/base.layout.gohtml",
 	}
 
-	// Use the template.ParseFiles() function to read the files and store the
-	// templates in a template set. Notice that we can pass the slice of file paths
-	// as a variadic parameter?
+	/* Use the template.ParseFiles() function to read the files and store the
+	templates in a template set.*/
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		log.Println(err.Error())
@@ -62,7 +61,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 	}
-
 }
 
 func register(w http.ResponseWriter, r *http.Request) {
@@ -71,9 +69,6 @@ func register(w http.ResponseWriter, r *http.Request) {
 		"./tmpl/base.layout.gohtml",
 	}
 
-	// Use the template.ParseFiles() function to read the files and store the
-	// templates in a template set. Notice that we can pass the slice of file paths
-	// as a variadic parameter?
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		log.Println(err.Error())
@@ -89,14 +84,15 @@ func register(w http.ResponseWriter, r *http.Request) {
 }
 
 func verify(w http.ResponseWriter, r *http.Request) {
-	// retrieve user's phone number
+
 	session, _ := store.Get(r, "acmeinc-cookie")
+	// retrieve user's name and phone number from the submitted form
 	userName := r.URL.Query().Get("name")
 	phoneNumber := r.URL.Query().Get("phone_number")
 	session.Values["name"] = userName
 	session.Values["phoneNumber"] = phoneNumber
 	session.Save(r, w)
-	log.Println("verifying...." + userName + " at " + phoneNumber)
+	log.Println("Verifying...." + userName + " at " + phoneNumber)
 	response, errResp, err := verifyClient.Request(phoneNumber, "GoTest", vonage.VerifyOpts{CodeLength: 6, Lg: "en-gb", WorkflowID: 4})
 
 	if err != nil {
@@ -117,9 +113,6 @@ func enterCode(w http.ResponseWriter, r *http.Request) {
 		"./tmpl/base.layout.gohtml",
 	}
 
-	// Use the template.ParseFiles() function to read the files and store the
-	// templates in a template set. Pass the slice of file paths
-	// as a variadic parameter.
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		log.Println(err.Error())
@@ -135,7 +128,7 @@ func enterCode(w http.ResponseWriter, r *http.Request) {
 }
 
 func checkCode(w http.ResponseWriter, r *http.Request) {
-	// user enters PIN
+	// Retrieve the PIN code that the user entered
 	session, _ := store.Get(r, "acmeinc-cookie")
 	pinCode := r.URL.Query().Get("pin_code")
 	response, errResp, err := verifyClient.Check(requestID, pinCode)
@@ -145,7 +138,6 @@ func checkCode(w http.ResponseWriter, r *http.Request) {
 	} else if response.Status != "0" {
 		fmt.Println("Error status " + errResp.Status + ": " + errResp.ErrorText)
 	} else {
-		// all good
 		fmt.Println("Request complete: " + response.RequestId)
 		// Set user as authenticated and return to home page
 		session.Values["registered"] = true
@@ -155,7 +147,7 @@ func checkCode(w http.ResponseWriter, r *http.Request) {
 }
 
 func unregister(w http.ResponseWriter, r *http.Request) {
-	// delete the session
+	// Delete the session
 	session, _ := store.Get(r, "acmeinc-cookie")
 	session.Options.MaxAge = -1
 	session.Save(r, w)
@@ -187,5 +179,4 @@ func main() {
 	log.Println("Starting server on :5000")
 	err = http.ListenAndServe(":5000", mux)
 	log.Fatal(err)
-
 }
