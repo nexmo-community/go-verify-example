@@ -29,7 +29,7 @@ var requestID string
 
 func home(w http.ResponseWriter, r *http.Request) {
 
-	session, _ := store.Get(r, "cookie-name")
+	session, _ := store.Get(r, "acmeinc-cookie")
 
 	// Check if user is authenticated
 	if auth, ok := session.Values["registered"].(bool); !ok || !auth {
@@ -90,7 +90,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 
 func verify(w http.ResponseWriter, r *http.Request) {
 	// retrieve user's phone number
-	session, _ := store.Get(r, "cookie-name")
+	session, _ := store.Get(r, "acmeinc-cookie")
 	userName := r.URL.Query().Get("name")
 	phoneNumber := r.URL.Query().Get("phone_number")
 	session.Values["name"] = userName
@@ -136,7 +136,7 @@ func enterCode(w http.ResponseWriter, r *http.Request) {
 
 func checkCode(w http.ResponseWriter, r *http.Request) {
 	// user enters PIN
-	session, _ := store.Get(r, "cookie-name")
+	session, _ := store.Get(r, "acmeinc-cookie")
 	pinCode := r.URL.Query().Get("pin_code")
 	response, errResp, err := verifyClient.Check(requestID, pinCode)
 
@@ -156,7 +156,7 @@ func checkCode(w http.ResponseWriter, r *http.Request) {
 
 func unregister(w http.ResponseWriter, r *http.Request) {
 	// delete the session
-	session, _ := store.Get(r, "cookie-name")
+	session, _ := store.Get(r, "acmeinc-cookie")
 	session.Options.MaxAge = -1
 	session.Save(r, w)
 	http.Redirect(w, r, "/", 302)
