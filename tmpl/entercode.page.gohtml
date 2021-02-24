@@ -1,0 +1,15 @@
+<!-- entercode.page.gohtml -->
+{{template "base" .}}
+
+{{define "main"}}
+  <h1>Acme inc.</h1>
+  <p>Please enter the code you received by SMS:</p>
+  <form action="/check-code">
+    <fieldset>
+      <label for="pin_code">Enter PIN:</label>
+      <input type="text" class="ghost-input" id="pin_code" name="pin_code" placeholder="123456" required><br><br>
+    <button type="submit" class="ghost-button">Let's Go!</button>
+    </fieldset>
+  </form>
+  
+{{end}} 

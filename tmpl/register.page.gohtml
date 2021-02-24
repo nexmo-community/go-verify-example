@@ -1,0 +1,16 @@
+<!-- register.page.gohtml -->
+{{template "base" .}}
+
+{{define "main"}}
+  <h1>Acme inc.</h1>
+  <p>Please register using your mobile/cell phone number for the exciting benefits our service provides!</p>
+  <form action="/verify">
+    <fieldset>
+      <label for="name">Your name:</label>
+      <input type="text" class="ghost-input" id="name" name="name" placeholder="Jane Smith" required/>   
+      <label for="phone_number">Your mobile number:</label>
+      <input type="text" class="ghost-input" id="phone_number" name="phone_number" placeholder="447700900001"required/>
+      <button type="submit" class="ghost-button">Register</button>
+    </fieldset>
+  </form>
+{{end}} 
